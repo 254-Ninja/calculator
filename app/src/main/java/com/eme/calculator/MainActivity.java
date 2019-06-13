@@ -151,3 +151,246 @@ public class MainActivity extends AppCompatActivity {
                             getSupportActionBar().show();
                         }
 
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+                            if(asyncTask==this)
+                                getSupportActionBar().hide();
+                            asyncTask=null;
+                        }
+                    };
+                    asyncTask.execute();
+                }
+            }
+        };
+        ansTv.setOnClickListener(menuviewListner);
+        qusTv.setOnClickListener(menuviewListner);
+        ((RelativeLayout)findViewById(R.id.menuContainerRl)).setOnClickListener(menuviewListner);
+        morefxnlBtnLl=(LinearLayout)findViewById(R.id.morefxnBtnLl);
+        morefxnlBtnLl.setOnTouchListener(new SwipeListener(MainActivity.this));
+        qusTv.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String qus = qusTv.getText().toString();
+                if(qus.length()>15){
+                    qus = qus.substring(0,15);
+                    qusTv.setText(qus);
+                }
+                try {
+                    String str;
+                    Token temp = lastToken(qus);
+                    if(temp.getType()==Token.num ) {
+                        str = SrbCalculator.compute(qus);
+                        //write code to get ans
+                        ansTv.setText(str) ;
+                    }
+                    else if(temp.getType()==Token.nul){
+                        ansTv.setText("");
+                    }
+                } catch (Exception e) {
+                    if(e.getMessage()=="infinity"){
+                        ansTv.setText("∞");
+                    }
+                    else
+                        Toast.makeText(MainActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                //set size
+                setTextSize();
+            }
+        });
+
+        delBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String str = qusTv.getText().toString();
+                if(str.length()>0)
+                    str = str.substring(0,str.length()-1);
+                else
+                    str = "";
+                qusTv.setText(str);
+            }
+        });
+        delBtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                qusTv.setText("");
+                return true;
+            }
+        });
+        eqlBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int reply =magic.verifytoken(qusTv.getText().toString());
+                if(reply==0)
+                    qusTv.setText(ansTv.getText().toString());
+                else
+                    qusTv.setText(Integer.toString(reply));
+                ansTv.setText("");
+            }
+        });
+
+        decBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    int deccount=0;
+                    Token lasttoken =Token.lastToken(qusTv.getText().toString());
+                    String str = lasttoken.getVal();
+                    for(int i =0;i<str.length();i++){
+                        if(str.charAt(i)=='.'){
+                            deccount++;
+                        }
+                    }
+                    if(deccount==0 &&
+                            !(lasttoken.getType()==Token.num && lasttoken.getVal().toString().compareTo("-")==0)
+                            && lasttoken.getVal().toString().compareTo("∞")!=0)
+                        qusTv.append(".");
+                } catch (Exception e) {e.printStackTrace();}
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu1, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        if(qusTv.getText().toString().compareTo("1501")!=0) {
+            getMenuInflater().inflate(R.menu.menu1, menu);
+        }
+        else {
+            getMenuInflater().inflate(R.menu.menu2, menu);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        super.onMenuOpened(featureId, menu);
+        lock.set(true);
+        return true;
+    }
+
+    @Override
+    public void onPanelClosed(int featureId, Menu menu) {
+        super.onPanelClosed(featureId, menu);
+        lock.set(false);
+        synchronized(stopWatch)
+        {
+            counter=0;
+            stopWatch.notify();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu1_0) {
+
+            return true;
+        }
+        if(id==R.id.menu1_1){
+            try {
+                d = new Dialog(MainActivity.this);
+                d.setContentView(R.layout.dialog_rating);
+
+                rateBar = (RatingBar) d.findViewById(R.id.rateBar);
+
+                rateTv = (TextView) d.findViewById(R.id.rateTv);
+
+                rateBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                        rateVal = Float.toString(rateBar.getRating());
+                        rateTv.setText("rating : " + rateVal);
+                    }
+                });
+
+                Button rateBtn = (Button) d.findViewById(R.id.rateBtn);
+
+                rateBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        d.dismiss();
+                    }
+                });
+
+                d.show();
+            } catch (Exception e){
+                Toast.makeText(MainActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        }
+        if(id==R.id.menu1_2){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(String.format("%1$s", getString(R.string.app_name)));
+            builder.setMessage(getResources().getText(R.string.aboutus));
+            builder.setPositiveButton("OK", null);
+            builder.setIcon(R.drawable.calc);
+            AlertDialog welcomeAlert = builder.create();
+            welcomeAlert.show();
+            return true;
+        }
+        if(id==R.id.menu1_3){
+            try {
+                startActivity(new Intent(MainActivity.this, KeyTables.class));
+            }catch(Exception e){
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        }
+        if(id==R.id.menu1_4){
+            if(toggleDynamic){
+                ansTv.setTextColor(Color.rgb(255,255,255));
+                toggleDynamic = false;
+            }
+            else{
+                ansTv.setTextColor(Color.rgb(102,102,102));
+                toggleDynamic = true;
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void setTextSize(){
+        int size = 51;
+        int n = qusTv.getText().toString().length();
+        if(n<14) size=51;
+        else if(n==14) size=48;
+        else if(n==15) size=45;
+        else size = 42;
+        qusTv.setTextSize(size);
+        ansTv.setTextSize(size-15*(2*size)/100);
+    }
+
+
+    //variables
+    Dialog d;
+    RatingBar rateBar;
+    TextView rateTv;
+    String rateVal;
+    TextView ansTv,qusTv;
+    AsyncTask<Void,Void,Void> asyncTask;
+    Handler handler;
+    Thread stopWatch;
+    AtomicBoolean lock=new AtomicBoolean(false);
+    int counter;
+    View.OnClickListener menuviewListner;
+    LinearLayout morefxnlBtnLl,buttonLl;
+    Button eqlBtn,delBtn,decBtn;
+    Boolean toggleDynamic;
+    public static Activity activity=null;
+    Magic magic;
+}
+
