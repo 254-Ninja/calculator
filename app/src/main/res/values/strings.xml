@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Calculator</string>
+    <string name="menu1_0">History</string>
+    <string name="menu1_1">Rate Our App</string>
+    <string name="menu1_2">About Us</string>
+    <string name="menu1_3">Advance Settings</string>
+    <string name="menu1_4">Toggle dynamic Ans</string>
 </resources>
