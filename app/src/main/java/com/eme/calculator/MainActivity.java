@@ -51,21 +51,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
-    public void myinit(){
-        this.activity=this;
+    public void myinit() {
+        this.activity = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("RAD");
-        toolbar.setTitleTextColor(Color.rgb(119,119,119));
+        toolbar.setTitleTextColor(Color.rgb(119, 119, 119));
         setSupportActionBar(toolbar);
 
         handler = new Handler();
 
-        ansTv = (TextView)findViewById(R.id.ansTv);
-        qusTv = (TextView)findViewById(R.id.qusTv);
+        ansTv = (TextView) findViewById(R.id.ansTv);
+        qusTv = (TextView) findViewById(R.id.qusTv);
 
-        eqlBtn = (Button)findViewById(R.id.eqlBtn);
-        delBtn = (Button)findViewById(R.id.delBtn);
-        decBtn = (Button)findViewById(R.id.decBtn);
+        eqlBtn = (Button) findViewById(R.id.eqlBtn);
+        delBtn = (Button) findViewById(R.id.delBtn);
+        decBtn = (Button) findViewById(R.id.decBtn);
 
         magic = new Magic();
 
@@ -74,7 +74,11 @@ public class MainActivity extends AppCompatActivity {
         asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                try {Thread.sleep(3000);} catch (InterruptedException e) {e.printStackTrace();}
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
 
@@ -88,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 getSupportActionBar().hide();
-                asyncTask=null;
+                asyncTask = null;
             }
         };
         asyncTask.execute();
@@ -96,12 +100,13 @@ public class MainActivity extends AppCompatActivity {
         stopWatch = new Thread(new Runnable() {
             @Override
             public void run() {
-                for(counter = 0; counter<80; counter++) {
-                    if(lock.get()) {
-                        synchronized(stopWatch) {
+                for (counter = 0; counter < 80; counter++) {
+                    if (lock.get()) {
+                        synchronized (stopWatch) {
                             try {
                                 stopWatch.wait();
-                            } catch (InterruptedException e) {}
+                            } catch (InterruptedException e) {
+                            }
                         }
                     }
                     handler.post(new Runnable() {
@@ -112,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                     try {
                         Thread.sleep(50);
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
         });
@@ -120,28 +126,26 @@ public class MainActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.M)
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void setListeners(){
+    public void setListeners() {
         menuviewListner = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(getSupportActionBar().isShowing()){
+                if (getSupportActionBar().isShowing()) {
                     getSupportActionBar().hide();
-                }
-                else if(asyncTask!=null){
-                    synchronized(stopWatch)
-                    {
-                        counter=0;
+                } else if (asyncTask != null) {
+                    synchronized (stopWatch) {
+                        counter = 0;
                         getSupportActionBar().show();
                     }
-                }
-                else{
+                } else {
                     asyncTask = new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... params) {
-                            if(stopWatch.isAlive())
+                            if (stopWatch.isAlive())
                                 stopWatch.stop();
                             stopWatch.start();
-                            while (stopWatch.isAlive()){}
+                            while (stopWatch.isAlive()) {
+                            }
                             return null;
                         }
 
@@ -154,9 +158,9 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         protected void onPostExecute(Void aVoid) {
                             super.onPostExecute(aVoid);
-                            if(asyncTask==this)
+                            if (asyncTask == this)
                                 getSupportActionBar().hide();
-                            asyncTask=null;
+                            asyncTask = null;
                         }
                     };
                     asyncTask.execute();
@@ -165,40 +169,40 @@ public class MainActivity extends AppCompatActivity {
         };
         ansTv.setOnClickListener(menuviewListner);
         qusTv.setOnClickListener(menuviewListner);
-        ((RelativeLayout)findViewById(R.id.menuContainerRl)).setOnClickListener(menuviewListner);
-        morefxnlBtnLl=(LinearLayout)findViewById(R.id.morefxnBtnLl);
+        ((RelativeLayout) findViewById(R.id.menuContainerRl)).setOnClickListener(menuviewListner);
+        morefxnlBtnLl = (LinearLayout) findViewById(R.id.morefxnBtnLl);
         morefxnlBtnLl.setOnTouchListener(new SwipeListener(MainActivity.this));
         qusTv.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
                 String qus = qusTv.getText().toString();
-                if(qus.length()>15){
-                    qus = qus.substring(0,15);
+                if (qus.length() > 15) {
+                    qus = qus.substring(0, 15);
                     qusTv.setText(qus);
                 }
                 try {
                     String str;
                     Token temp = lastToken(qus);
-                    if(temp.getType()==Token.num ) {
+                    if (temp.getType() == Token.num) {
                         str = SrbCalculator.compute(qus);
                         //write code to get ans
-                        ansTv.setText(str) ;
-                    }
-                    else if(temp.getType()==Token.nul){
+                        ansTv.setText(str);
+                    } else if (temp.getType() == Token.nul) {
                         ansTv.setText("");
                     }
                 } catch (Exception e) {
-                    if(e.getMessage()=="infinity"){
+                    if (e.getMessage() == "infinity") {
                         ansTv.setText("∞");
-                    }
-                    else
-                        Toast.makeText(MainActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } else
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 //set size
                 setTextSize();
@@ -209,8 +213,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String str = qusTv.getText().toString();
-                if(str.length()>0)
-                    str = str.substring(0,str.length()-1);
+                if (str.length() > 0)
+                    str = str.substring(0, str.length() - 1);
                 else
                     str = "";
                 qusTv.setText(str);
@@ -226,8 +230,8 @@ public class MainActivity extends AppCompatActivity {
         eqlBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int reply =magic.verifytoken(qusTv.getText().toString());
-                if(reply==0)
+                int reply = magic.verifytoken(qusTv.getText().toString());
+                if (reply == 0)
                     qusTv.setText(ansTv.getText().toString());
                 else
                     qusTv.setText(Integer.toString(reply));
@@ -239,19 +243,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    int deccount=0;
-                    Token lasttoken =Token.lastToken(qusTv.getText().toString());
+                    int deccount = 0;
+                    Token lasttoken = Token.lastToken(qusTv.getText().toString());
                     String str = lasttoken.getVal();
-                    for(int i =0;i<str.length();i++){
-                        if(str.charAt(i)=='.'){
+                    for (int i = 0; i < str.length(); i++) {
+                        if (str.charAt(i) == '.') {
                             deccount++;
                         }
                     }
-                    if(deccount==0 &&
-                            !(lasttoken.getType()==Token.num && lasttoken.getVal().toString().compareTo("-")==0)
-                            && lasttoken.getVal().toString().compareTo("∞")!=0)
+                    if (deccount == 0 &&
+                            !(lasttoken.getType() == Token.num && lasttoken.getVal().toString().compareTo("-") == 0)
+                            && lasttoken.getVal().toString().compareTo("∞") != 0)
                         qusTv.append(".");
-                } catch (Exception e) {e.printStackTrace();}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -265,10 +271,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
-        if(qusTv.getText().toString().compareTo("1501")!=0) {
+        if (qusTv.getText().toString().compareTo("1501") != 0) {
             getMenuInflater().inflate(R.menu.menu1, menu);
-        }
-        else {
+        } else {
             getMenuInflater().inflate(R.menu.menu2, menu);
         }
         return super.onPrepareOptionsMenu(menu);
@@ -285,9 +290,8 @@ public class MainActivity extends AppCompatActivity {
     public void onPanelClosed(int featureId, Menu menu) {
         super.onPanelClosed(featureId, menu);
         lock.set(false);
-        synchronized(stopWatch)
-        {
-            counter=0;
+        synchronized (stopWatch) {
+            counter = 0;
             stopWatch.notify();
         }
     }
@@ -299,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         }
-        if(id==R.id.menu1_1){
+        if (id == R.id.menu1_1) {
             try {
                 d = new Dialog(MainActivity.this);
                 d.setContentView(R.layout.dialog_rating);
@@ -326,12 +330,12 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 d.show();
-            } catch (Exception e){
-                Toast.makeText(MainActivity.this,e.getMessage(), Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
             return true;
         }
-        if(id==R.id.menu1_2){
+        if (id == R.id.menu1_2) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(String.format("%1$s", getString(R.string.app_name)));
             builder.setMessage(getResources().getText(R.string.aboutus));
@@ -341,21 +345,20 @@ public class MainActivity extends AppCompatActivity {
             welcomeAlert.show();
             return true;
         }
-        if(id==R.id.menu1_3){
+        if (id == R.id.menu1_3) {
             try {
                 startActivity(new Intent(MainActivity.this, KeyTables.class));
-            }catch(Exception e){
+            } catch (Exception e) {
                 Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
             return true;
         }
-        if(id==R.id.menu1_4){
-            if(toggleDynamic){
-                ansTv.setTextColor(Color.rgb(255,255,255));
+        if (id == R.id.menu1_4) {
+            if (toggleDynamic) {
+                ansTv.setTextColor(Color.rgb(255, 255, 255));
                 toggleDynamic = false;
-            }
-            else{
-                ansTv.setTextColor(Color.rgb(102,102,102));
+            } else {
+                ansTv.setTextColor(Color.rgb(102, 102, 102));
                 toggleDynamic = true;
             }
             return true;
@@ -363,15 +366,15 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void setTextSize(){
+    public void setTextSize() {
         int size = 51;
         int n = qusTv.getText().toString().length();
-        if(n<14) size=51;
-        else if(n==14) size=48;
-        else if(n==15) size=45;
+        if (n < 14) size = 51;
+        else if (n == 14) size = 48;
+        else if (n == 15) size = 45;
         else size = 42;
         qusTv.setTextSize(size);
-        ansTv.setTextSize(size-15*(2*size)/100);
+        ansTv.setTextSize(size - 15 * (2 * size) / 100);
     }
 
 
@@ -380,17 +383,17 @@ public class MainActivity extends AppCompatActivity {
     RatingBar rateBar;
     TextView rateTv;
     String rateVal;
-    TextView ansTv,qusTv;
-    AsyncTask<Void,Void,Void> asyncTask;
+    TextView ansTv, qusTv;
+    AsyncTask<Void, Void, Void> asyncTask;
     Handler handler;
     Thread stopWatch;
-    AtomicBoolean lock=new AtomicBoolean(false);
+    AtomicBoolean lock = new AtomicBoolean(false);
     int counter;
     View.OnClickListener menuviewListner;
-    LinearLayout morefxnlBtnLl,buttonLl;
-    Button eqlBtn,delBtn,decBtn;
+    LinearLayout morefxnlBtnLl, buttonLl;
+    Button eqlBtn, delBtn, decBtn;
     Boolean toggleDynamic;
-    public static Activity activity=null;
+    public static Activity activity = null;
     Magic magic;
 }
 
